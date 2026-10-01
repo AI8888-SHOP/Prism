@@ -80,6 +80,18 @@ pnpm build
 
 当 `web/dist` 存在时，Go 服务可以在同一域名下直接提供前端页面。
 
+## Docker 部署
+
+发布镜像由 GitHub Actions 在推送 `v*` 标签时自动构建为 `amd64` 和 `arm64` 多架构镜像，并发布到 GHCR。部署机不需要安装 Go 或 Node.js：
+
+```bash
+cp deploy/.env.example deploy/.env
+# 编辑 deploy/.env，至少替换 PROXY_API_KEY
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d
+```
+
+默认访问地址为 `http://localhost:8091`，运行数据保存在 `deploy/data/`。健康检查地址为 `/health`。
+
 ## 配置说明
 
 主要配置入口是 `.env`。常用配置包括：

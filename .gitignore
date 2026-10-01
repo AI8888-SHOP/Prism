@@ -43,5 +43,10 @@ web/src/.umi
 web/src/.umi-production
 
 # Local deployment scripts or machine-specific overrides
-deploy/
+# Deployment manifests are versioned; keep local overrides and secrets out.
+deploy/.env
+deploy/.env.*
+!deploy/.env.example
+deploy/data/
+deploy/*.local.yml
 deploy.sh

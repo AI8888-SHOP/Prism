@@ -1,0 +1,24 @@
+services:
+  prism:
+    image: ${PRISM_IMAGE:-ghcr.io/ai8888-shop/prism:latest}
+    container_name: prism
+    restart: unless-stopped
+    ports:
+      - "${PRISM_PORT:-8091}:8080"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8080
+      PROXY_API_KEY: ${PROXY_API_KEY:?set PROXY_API_KEY in deploy/.env}
+      STORAGE_DB_DIR: /app/data
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://chatgpt.com/backend-api}
+      OPENAI_OAUTH_CLIENT_ID: ${OPENAI_OAUTH_CLIENT_ID:-}
+      DEFAULT_MODEL: ${DEFAULT_MODEL:-gpt-5.4}
+      DEFAULT_REASONING_EFFORT: ${DEFAULT_REASONING_EFFORT:-medium}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/health >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
