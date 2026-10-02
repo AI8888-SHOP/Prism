@@ -3,11 +3,13 @@ services:
     image: ${PRISM_IMAGE:-ghcr.io/ai8888-shop/prism:latest}
     container_name: prism
     restart: unless-stopped
-    ports:
-      - "${PRISM_PORT:-8091}:8080"
+    # The Sub2API Prism adapter validates a numeric loopback endpoint
+    # (127.0.0.1:8319). Share its network namespace so that endpoint stays
+    # private and is reachable from the gateway container.
+    network_mode: "container:sub2api"
     environment:
       HOST: 0.0.0.0
-      PORT: 8080
+      PORT: 8319
       PROXY_API_KEY: ${PROXY_API_KEY:?set PROXY_API_KEY in deploy/.env}
       STORAGE_DB_DIR: /app/data
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://chatgpt.com/backend-api}
@@ -17,7 +19,7 @@ services:
     volumes:
       - ./data:/app/data
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/health >/dev/null"]
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8319/health >/dev/null"]
       interval: 30s
       timeout: 5s
       retries: 3

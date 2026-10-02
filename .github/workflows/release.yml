@@ -54,3 +54,28 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Keep a downloadable image artifact for deployments where the GHCR package
+  # is private or package-read credentials are not available on the host.
+  image-artifact:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: prism:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Export image
+        run: docker save prism:ci | gzip > prism-linux-amd64.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prism-linux-amd64
+          path: prism-linux-amd64.tar.gz
+          retention-days: 7
